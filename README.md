@@ -1,132 +1,181 @@
-# JANUS
+JANUS — AI Multimodal WhatsApp Notification Router
+🚀 ## Overview
 
-An AI-powered multimodal notification routing system built for the WhatsApp Message Router Hackathon.
+JANUS is an AI-powered notification routing system that intelligently prioritizes WhatsApp messages instead of treating every notification equally.
 
-## Overview
+Rather than relying solely on keywords, JANUS combines multimodal understanding, semantic retrieval, user context, and LLM reasoning to determine whether a message should interrupt the user immediately, be shown later, or be muted.
 
-JANUS intelligently classifies incoming WhatsApp messages and determines whether they should:
+The system supports:
 
-- Notify immediately
-- Be added to the digest
-- Be muted
+Text messages
+Image messages (OCR + scene understanding)
+Voice notes (speech transcription)
 
-Unlike traditional rule-based systems, JANUS reasons over multiple modalities including:
+## Problem
 
-- Text messages
-- Images
-- Voice notes
+Modern messaging platforms generate excessive notifications.
 
-using semantic retrieval and large language models.
+Important messages such as OTPs, banking alerts, urgent work updates, and deadlines are often buried beneath promotions, forwarded spam, memes, and casual conversations.
 
----
+JANUS solves this by routing every message into one of three actions:
+
+🔔 Notify
+📝 Digest
+🔕 Mute
 
 ## Features
 
-- Semantic Retrieval (RAG)
-- Context-aware Decision Agent
-- Image Understanding
-- Voice Transcription
-- OCR Cache
-- Audio Cache
-- Decision Cache
-- Chroma Vector Database
-- Gemini 3.6 Flash
-- Modular AI Architecture
+✅ Hybrid Rule Engine + LLM
 
----
+✅ Multimodal Processing
+
+OCR for posters/screenshots
+Voice transcription
+
+✅ Retrieval-Augmented Generation (RAG)
+
+Semantic search over previous message history
+
+✅ User Context Builder
+
+User metadata
+Groups
+Business accounts
+Events
+Conversation history
+
+✅ Local Embeddings
+
+Sentence Transformers (all-MiniLM-L6-v2)
+
+✅ ChromaDB Vector Database
+
+✅ OCR Cache
+
+✅ Voice Cache
+
+✅ Decision Cache
 
 ## Architecture
 
 Incoming Message
-
-↓
-
-Media Router
-
-↓
-
-Text / Image / Voice
-
-↓
-
-Normalized Text
-
-↓
-
+        │
+        ▼
 Context Builder
-
-↓
-
-Semantic Retrieval
-
-↓
-
-Decision Agent
-
-↓
-
-Structured JSON
-
-↓
-
-Output CSV
-
----
+        │
+ ┌──────┴────────┐
+ │               │
+Media Router     Metadata
+ │
+ ├── OCR
+ ├── Voice
+ └── Text
+        │
+        ▼
+Semantic Retrieval (ChromaDB)
+        │
+        ▼
+Rule Engine
+        │
+        ├── Notify
+        ├── Digest
+        └── Mute
+        │
+        ▼
+Gemini Decision Agent
+        │
+        ▼
+output.csv
 
 ## Tech Stack
 
+Language
+
 Python 3.11
 
-Gemini 3.6 Flash
+LLM
 
-Gemini Embeddings (temporary)
+Google Gemini 3.6 Flash
+
+Embeddings
+
+Sentence Transformers
+all-MiniLM-L6-v2
+
+Vector Database
 
 ChromaDB
 
-Pandas
+Libraries
 
----
+pandas
+torch
+sentence-transformers
+google-genai
+python-dotenv
 
-## Folder Structure
+## Project Structure
+
+Janus/
 
 src/
-
-agents/
-
-builders/
-
-llm/
-
-loaders/
-
-media/
-
-pipeline/
-
-retrieval/
-
-cache/
+    agents/
+    builders/
+    llm/
+    media/
+    retrieval/
+    pipeline/
+    loaders/
 
 dataset/
 
----
+cache/
+    audio/
+    ocr/
+    chroma/
+    decisions/
 
-## Status
+main.py
+requirements.txt
+README.md
+output.csv
 
-🚧 Under active development.
+## Pipeline
 
-Current progress:
+Load dataset
+Process media
+Extract OCR / speech
+Build user context
+Retrieve similar historical messages
+Apply Rule Engine
+Use Gemini only for ambiguous cases
+Generate routing decision
+Export output.csv
 
-- Text Routing ✅
-- Image Understanding ✅
-- Voice Transcription ✅
-- Semantic Retrieval ✅
-- Decision Agent ✅
-- Batch Pipeline 🚧
-- Deployment 🚧
+## Output Schema
 
----
+message_id
+
+action
+
+message_type
+
+reason
+
+confidence
+
+evidence_message_ids
+
+## Performance Optimizations
+
+Local embeddings
+Chroma vector search
+OCR caching
+Voice transcription caching
+Decision caching
+Rule-first routing to minimize LLM calls
 
 ## Authors
 
 Krati Bhatia
+Hackathon Submission – JANUS
