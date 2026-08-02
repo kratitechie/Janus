@@ -2,6 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from src.agents.rule_engine import RuleEngine
 from src.llm.gemini_client import GeminiClient
 from src.llm.prompts import build_decision_prompt
 
@@ -12,12 +13,24 @@ class DecisionAgent:
 
         self.llm = GeminiClient()
 
+        self.rules = RuleEngine()
+
         self.cache = Path("cache/decisions")
         self.cache.mkdir(parents=True, exist_ok=True)
 
     def decide(self, context):
 
-        # ---------------- Cache Key ----------------
+        # ---------------- Rule Engine ----------------
+
+        rule = self.rules.decide(context)
+
+        if rule is not None:
+
+            print("[RULE ENGINE]")
+
+            return rule
+            
+        # ---------------- Cache ----------------
 
         text = context["normalized_text"]
 
@@ -26,8 +39,6 @@ class DecisionAgent:
         ).hexdigest()
 
         cache_file = self.cache / f"{cache_key}.json"
-
-        # ---------------- Cache Hit ----------------
 
         if cache_file.exists():
 
@@ -39,8 +50,8 @@ class DecisionAgent:
                 )
             )
 
-        # ---------------- Build Prompt ----------------
-
+        # ---------------- Gemini ----------------
+        print("[GEMINI]")
         prompt = build_decision_prompt(context)
 
         try:
@@ -53,14 +64,15 @@ class DecisionAgent:
             decision.setdefault("confidence", 0.5)
             decision.setdefault("evidence_message_ids", [])
 
-            # ---------------- Save Cache ----------------
-
             cache_file.write_text(
+
                 json.dumps(
                     decision,
                     indent=2
                 ),
+
                 encoding="utf-8"
+
             )
 
             return decision

@@ -1,19 +1,19 @@
 import os
 import json
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
+from google.genai.errors import ClientError
 
 
-# -----------------------------
-# Load Environment Variables
-# -----------------------------
 ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT / ".env", override=True)
 
 
 class GeminiClient:
+
     def __init__(self):
 
         api_key = os.getenv("GEMINI_API_KEY")
@@ -23,26 +23,60 @@ class GeminiClient:
 
         self.client = genai.Client(api_key=api_key)
 
-        # We'll use this everywhere in JANUS
         self.model = "gemini-3.6-flash"
 
-    def generate(self, prompt: str) -> str:
+    def _generate(self, **kwargs):
 
-        response = self.client.models.generate_content(
+        retries = 5
+
+        for attempt in range(retries):
+
+            try:
+
+                return self.client.models.generate_content(**kwargs)
+
+            except ClientError as e:
+
+                if e.status_code == 429:
+
+                    wait = 40
+
+                    print(f"\n[RATE LIMIT] Waiting {wait}s...\n")
+
+                    time.sleep(wait)
+
+                    continue
+
+                raise
+
+        raise RuntimeError("Maximum retries exceeded.")
+
+    def generate(self, prompt: str):
+
+        response = self._generate(
+
             model=self.model,
-            contents=prompt,
+
+            contents=prompt
+
         )
 
         return response.text
 
-    def generate_json(self, prompt: str) -> dict:
+    def generate_json(self, prompt: str):
 
-        response = self.client.models.generate_content(
+        response = self._generate(
+
             model=self.model,
+
             contents=prompt,
+
             config={
+
                 "response_mime_type": "application/json"
+
             }
+
         )
 
         return json.loads(response.text)

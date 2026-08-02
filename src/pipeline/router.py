@@ -46,5 +46,10 @@ class Router:
                 )
 
             })
+            
+            pd.DataFrame(results).to_csv(
+                "output_partial.csv",
+                index=False
+            )
 
         return pd.DataFrame(results)

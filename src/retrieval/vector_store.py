@@ -1,13 +1,14 @@
 import chromadb
-
-from src.llm.embedding_client import EmbeddingClient
+from sentence_transformers import SentenceTransformer
 
 
 class VectorStore:
 
     def __init__(self):
 
-        self.embedder = EmbeddingClient()
+        self.embedder = SentenceTransformer(
+            "all-MiniLM-L6-v2"
+        )
 
         self.client = chromadb.PersistentClient(
             path="cache/chroma"
@@ -18,6 +19,10 @@ class VectorStore:
         )
 
     def add_messages(self, messages):
+
+        documents = []
+        ids = []
+        metadatas = []
 
         for message in messages:
 
@@ -38,28 +43,32 @@ Group:
 {message["group_id"]}
 """
 
-            embedding = self.embedder.embed(document)
+            documents.append(document)
+            ids.append(str(message["message_id"]))
+            metadatas.append(message)
 
-            self.collection.add(
+        embeddings = self.embedder.encode(
+            documents,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        ).tolist()
 
-                ids=[str(message["message_id"])],
-
-                documents=[document],
-
-                embeddings=[embedding],
-
-                metadatas=[message]
-
-            )
+        self.collection.add(
+            ids=ids,
+            documents=documents,
+            embeddings=embeddings,
+            metadatas=metadatas
+        )
 
     def search(self, query, top_k=5):
 
-        embedding = self.embedder.embed(query)
+        embedding = self.embedder.encode(
+            query,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        ).tolist()
 
         return self.collection.query(
-
             query_embeddings=[embedding],
-
             n_results=top_k
-
         )
