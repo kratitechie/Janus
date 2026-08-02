@@ -1,0 +1,67 @@
+JANUS Development Log
+HackerRank Orchestrate Hackathon
+
+Project:
+AI-powered multimodal WhatsApp notification router.
+
+Development Summary
+
+1. Implemented dataset loading and modular project structure.
+
+2. Built Context Builder to combine:
+   - User metadata
+   - Group metadata
+   - Business metadata
+   - Message history
+   - Events
+   - Media content
+
+3. Implemented Media Router.
+   - OCR for images
+   - Speech transcription for voice notes
+   - Text passthrough for normal messages
+
+4. Added semantic retrieval using:
+   - SentenceTransformers
+   - ChromaDB
+
+5. Implemented Rule Engine for deterministic routing:
+   - OTP
+   - Banking
+   - Deadlines
+   - Promotions
+   - Spam
+   - Scam detection
+
+6. Added Gemini Decision Agent for ambiguous messages only.
+
+7. Implemented caching:
+   - OCR cache
+   - Voice transcription cache
+   - Decision cache
+
+8. Switched embeddings from Gemini to SentenceTransformers after hitting API quota.
+
+9. Generated final output.csv for all 110 messages.
+
+Architecture
+
+Incoming Message
+→ Context Builder
+→ Media Processing
+→ Semantic Retrieval
+→ Rule Engine
+→ Gemini Decision Agent
+→ output.csv
+
+Optimization Highlights
+
+- Local embeddings
+- Cached OCR
+- Cached speech transcription
+- Cached decisions
+- Rule-first execution to reduce LLM usage
+
+Final Result
+
+Successfully generated predictions for all 110 messages and exported output.csv.
