@@ -58,34 +58,36 @@ Sentence Transformers (all-MiniLM-L6-v2)
 
 ## Architecture
 
-Incoming Message
-        │
-        ▼
-Context Builder
-        │
- ┌──────┴────────┐
- │               │
-Media Router     Metadata
- │
- ├── OCR
- ├── Voice
- └── Text
-        │
-        ▼
-Semantic Retrieval (ChromaDB)
-        │
-        ▼
-Rule Engine
-        │
-        ├── Notify
-        ├── Digest
-        └── Mute
-        │
-        ▼
-Gemini Decision Agent
-        │
-        ▼
-output.csv
+```mermaid
+flowchart TD
+
+A[Incoming WhatsApp Message]
+
+A --> B[Context Builder]
+
+B --> C[Media Router]
+B --> D[Metadata Loader]
+
+C --> E[OCR]
+C --> F[Voice Transcription]
+C --> G[Text]
+
+E --> H[Semantic Retrieval<br/>ChromaDB]
+F --> H
+G --> H
+
+D --> H
+
+H --> I[Rule Engine]
+
+I -->|Rule Match| J[Decision]
+
+I -->|Ambiguous| K[Gemini Decision Agent]
+
+K --> J
+
+J --> L[output.csv]
+```
 
 ## Tech Stack
 
